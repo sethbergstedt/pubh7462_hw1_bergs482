@@ -1,0 +1,89 @@
+---
+title: "PUBH 7462 HW1"
+author: "Seth Bergstedt"
+output: github_document
+---
+
+```{r setup, include = FALSE}
+#Load all the good stuff
+library(tidyverse)
+
+#Working directory for .RMD
+knitr::opts_knit$set(echo = TRUE,
+                     root.dir = rprojroot::find_rstudio_root_file())
+
+#Controlling figure output in markdown
+knitr::opts_chunk$set(
+#  fig.height =   
+  fig.width = 6,
+#  fig.asp = .5,
+  out.width = "90%",
+#  out.height = 
+ fig.align = "center",
+  cache = FALSE,
+  echo  = TRUE
+)
+
+#Set Theme for ggplot2 - centers title and legend at bottom by default
+theme_set(theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom"))
+
+#Set Scientific notation output and decimal places for knitr
+options(scipen = 999)
+options(digits = 3)
+```
+
+# Problem 2.1
+
+```{r prob2.1}
+# building initial tibble
+normal_sample = tibble(x = rnorm(1000,0,1),
+                       y = rnorm(1000,1,2))
+
+# adding indicator variable (x+y>0.5) to normal_sample and coercing 
+# it into a factor with levels "Yes" and "No"
+normal_sample = normal_sample %>%
+  mutate(sum_indicator = factor(ifelse(x + y > 0.5,"Yes","No")),
+         sum_indicator = fct_relevel(sum_indicator,"Yes"))
+
+ggplot(normal_sample) + 
+  geom_point(aes(x = x,y = y,color = sum_indicator)) + 
+  labs(title = "Relationship between Independent Normal Variables",
+       x = "X ~ N(0,1)",y = "Y ~ N(1,2)",
+       color = "Is X + Y > 0.5")
+```
+
+# Problem 2.2
+
+```{r prob2.2}
+#Read data with relative path
+penguin.df <- read_rds("./data/penguin.RDS")
+```
+
+### Problem 2.2.1
+
+ - Each row of the penguins dataset maps to an individual penguin measured near Palmer Station in Antarctica. 
+ - In this dataset, there are `r dim(penguin.df)[1]` observations, and `r dim(penguin.df)[2]` features. The features include:
+  (@) Species of penguin (Adélie, Chinstrap, Gentoo)
+  (@) Island in the Palmer Archipelago
+  (@) Bill length in mm
+  (@) Bill depth in mm
+  (@) Flipper length in mm
+  (@) Body mass in grams
+  (@) Sex of the penguin
+  (@) Year that the given penguin was observed (2007, 2008, 2009)
+ - The mean flipper length is `r mean(penguin.df$flipper_length_mm,na.rm=T)` with a standard deviation of `r sd(penguin.df$flipper_length_mm,na.rm=T)`
+ - The mean bill length is `r mean(penguin.df$bill_length_mm,na.rm=T)` with a standard deviation of `r sd(penguin.df$bill_length_mm,na.rm=T)`
+
+### Problem 2.2.2
+
+```{r prob2.2.2,message=FALSE,warning = FALSE}
+ggplot(penguin.df) + 
+  geom_point(aes(x = bill_length_mm,y = flipper_length_mm,color = species)) + 
+  facet_wrap(.~sex) + 
+  labs(title = "Bill Length vs Flipper Length by Species and Sex",
+       x = "Bill Length (mm)",y = "Flipper Length (mm)",
+       color = "Species")
+```
+
+In general, male penguins appear to have longer bills and flippers than females (flipper size difference is more noteable). Additionally, the species are strongly separated by species (very clear clustering where Adélie and Chinstrap penguins have similar flipper lengths but different bill lengths while Gentoo penguins have larger flipper lengths). Beyond this, it is worth noting that there are no missing measurements among Chinstrap penguins. 
+
